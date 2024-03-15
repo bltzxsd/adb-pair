@@ -1,4 +1,5 @@
 use std::net::Ipv4Addr;
+use std::process::ExitStatus;
 use std::process::Stdio;
 use std::sync::mpsc;
 use std::time::Duration;
@@ -73,12 +74,10 @@ struct Device {
 impl Device {
     fn new(service_info: ServiceInfo) -> Self {
         Self {
-            // this is not a good way to get IP
-            // however, we can ignore this as `ServiceEvent::ServiceResolved`
-            // takes care of this already
+            // this is not a good way to get anything from a HashSet
+            // however, this is okay as `ServiceEvent::ServiceResolved`
+            // has atleast one IPv4 present after discovery resolution
             ip: **service_info
-                // regular get_addresses will pollute with
-                // IPv6 addresses which adb can't use
                 .get_addresses_v4()
                 .iter()
                 .next()
@@ -86,7 +85,7 @@ impl Device {
             port: service_info.get_port(),
         }
     }
-    fn pair(&self, password: &str) -> Result<std::process::ExitStatus> {
+    fn pair(&self, password: &str) -> Result<ExitStatus> {
         let adb = std::process::Command::new("adb")
             .args(["pair", &self.to_string(), password])
             .stdout(Stdio::piped())
