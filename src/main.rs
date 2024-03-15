@@ -87,8 +87,8 @@ impl Device {
         }
     }
     fn pair(&self, password: &str) -> Result<std::process::ExitStatus> {
-        let adb = std::process::Command::new("pwsh")
-            .args(["-Command", "adb", "pair", &self.to_string(), password])
+        let adb = std::process::Command::new("adb")
+            .args(["pair", &self.to_string(), password])
             .stdout(Stdio::piped())
             .spawn()?
             .wait()?;
